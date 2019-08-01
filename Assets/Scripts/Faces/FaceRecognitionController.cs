@@ -59,8 +59,7 @@ namespace Faces
             using (var content = new ByteArrayContent(byteData))
             {
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-                Debug.Log($"Recognize:{Environment.NewLine}{uri}");
+                
                 var response = await client.PostAsync(uri, content);
                 var contentString = await response.Content.ReadAsStringAsync();
                 Debug.Log($"Recognize:{Environment.NewLine}{JsonUtils.Format(contentString)}");
