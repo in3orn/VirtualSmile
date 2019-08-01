@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: Camera
   m_EditorClassIdentifier: 
   defaultCamera: 1
+  maxCameraSize: 650
+  cameraFps: 30

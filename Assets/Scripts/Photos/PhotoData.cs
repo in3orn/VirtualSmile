@@ -8,5 +8,8 @@ namespace Photos
     {
         public Texture2D texture;
         public bool persistent;
+        public float cameraAngle;
+
+        public float AspectRatio => (float) texture.width / texture.height;
     }
 }

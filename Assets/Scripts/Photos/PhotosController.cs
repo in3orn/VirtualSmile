@@ -97,20 +97,12 @@ namespace Photos
             File.WriteAllBytes($"{SavePath}/{config.saveName}-{fileIndex}.png", bytes);
         }
 
-        public void Add(Texture2D texture)
+        public void Add(PhotoData photo)
         {
             upToDate = false;
 
-            photos.Add(CreateNewPhoto(texture));
+            photos.Add(photo);
             OnUpdated.Invoke();
-        }
-
-        private PhotoData CreateNewPhoto(Texture2D texture)
-        {
-            return new PhotoData
-            {
-                texture = texture
-            };
         }
     }
 }

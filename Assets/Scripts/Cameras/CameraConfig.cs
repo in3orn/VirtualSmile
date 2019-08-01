@@ -6,5 +6,7 @@ namespace Cameras
     public class CameraConfig : ScriptableObject
     {
         public int defaultCamera;
+        public int maxCameraSize;
+        public float cameraFps;
     }
 }

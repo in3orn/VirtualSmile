@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Common;
+using Photos;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Cameras
@@ -8,6 +10,7 @@ namespace Cameras
         [SerializeField] private RawImage previewImage;
         [SerializeField] private CameraConfig config;
 
+        private RectTransform previewTransform;
         private CameraEntry[] cameras;
         private CameraEntry currentCamera;
         private int currentIndex;
@@ -17,12 +20,21 @@ namespace Cameras
         public bool Playing => Initialized && currentCamera.texture.isPlaying;
         public float CurrentAngle => currentCamera.texture.videoRotationAngle;
 
+        public float AspectRatio =>
+            (float) currentCamera.texture.requestedWidth / currentCamera.texture.requestedHeight;
+
         public void Init()
         {
+            InitPreview();
             InitCameras();
 
             Initialized = cameras.Length > 0;
             if (Initialized) InitCurrentCamera();
+        }
+
+        private void InitPreview()
+        {
+            previewTransform = previewImage.GetComponent<RectTransform>();
         }
 
         private void InitCameras()
@@ -42,17 +54,42 @@ namespace Cameras
             currentCamera = cameras[currentIndex];
             currentCamera.texture.Play();
 
-            UpdateAngle();
-            //TODO update aspect ratio
+            UpdatePreview();
         }
 
         private CameraEntry Create(WebCamDevice device)
         {
-            return new CameraEntry
+            var result = new CameraEntry
             {
                 device = device,
-                texture = new WebCamTexture(device.name)
-            }; //TODO init target fps + resolution
+                texture = CreateTexture(device)
+            };
+
+            return result;
+        }
+
+        private WebCamTexture CreateTexture(WebCamDevice device)
+        {
+            var resolution = GetPreferredResolution(device);
+
+            return new WebCamTexture(device.name)
+            {
+                requestedWidth = resolution.width,
+                requestedHeight = resolution.height,
+                requestedFPS = config.cameraFps
+            };
+        }
+
+        private Resolution GetPreferredResolution(WebCamDevice device)
+        {
+            for (var i = device.availableResolutions.Length - 1; i >= 0; i--)
+            {
+                var resolution = device.availableResolutions[i];
+                if (resolution.width < config.maxCameraSize && resolution.height < config.maxCameraSize)
+                    return resolution;
+            }
+
+            return device.availableResolutions[0];
         }
 
         public void SwitchCamera()
@@ -68,17 +105,20 @@ namespace Cameras
             currentCamera = cameras[currentIndex];
             currentCamera.texture.Play();
 
-            UpdateAngle();
-            //TODO update aspect ratio
+            UpdatePreview();
         }
 
-        public Texture2D TakePhoto()
+        public PhotoData TakePhoto()
         {
-            Texture2D photo = new Texture2D(currentCamera.texture.width, currentCamera.texture.height);
-            photo.SetPixels(currentCamera.texture.GetPixels());
-            photo.Apply();
+            Texture2D texture = new Texture2D(currentCamera.texture.width, currentCamera.texture.height);
+            texture.SetPixels(currentCamera.texture.GetPixels());
+            texture.Apply();
 
-            return photo;
+            return new PhotoData
+            {
+                texture = texture,
+                cameraAngle = CurrentAngle
+            };
         }
 
         private void LateUpdate()
@@ -87,9 +127,11 @@ namespace Cameras
                 previewImage.texture = currentCamera.texture;
         }
 
-        private void UpdateAngle()
+        private void UpdatePreview()
         {
-            previewImage.transform.localRotation = Quaternion.Euler(0f, 0f, -CurrentAngle);
+            previewTransform.localRotation = Quaternion.Euler(0f, 0f, -CurrentAngle);
+            previewTransform.ApplyRatio(AspectRatio);
+            Debug.Log("Aspect ratio: " + AspectRatio);
         }
     }
 }
