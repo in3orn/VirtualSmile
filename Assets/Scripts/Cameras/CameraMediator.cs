@@ -1,5 +1,7 @@
+using Photos;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace Cameras
 {
@@ -8,9 +10,10 @@ namespace Cameras
         [SerializeField] private Button switchCameraButton;
         [SerializeField] private Button takePhotoButton;
         [SerializeField] private CameraDevice cameraDevice;
-        [SerializeField] private RectTransform cameraPreview;
         [SerializeField] private GameObject error;
 
+        [Inject] private PhotosController photosController;
+        
         private void Start()
         {
             cameraDevice.Init();
@@ -35,6 +38,7 @@ namespace Cameras
         private void HandleTakePhotoButtonClicked()
         {
             var photo = cameraDevice.TakePhoto();
+            photosController.Add(photo);
         }
 
         private void HandleSwitchCameraButtonClicked()

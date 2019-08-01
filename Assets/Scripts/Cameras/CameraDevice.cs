@@ -79,8 +79,6 @@ namespace Cameras
             photo.Apply();
 
             return photo;
-//            byte[] bytes = photo.EncodeToPNG();
-//            File.WriteAllBytes("E:/UnityGames/VirtualSmilePhotos/photo.png", bytes);
         }
 
         private void LateUpdate()
