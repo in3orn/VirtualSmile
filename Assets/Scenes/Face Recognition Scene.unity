@@ -676,10 +676,5 @@ PrefabInstance:
       propertyPath: faceRecognitionButton
       value: 
       objectReference: {fileID: 239082169}
-    - target: {fileID: 7607746846948072130, guid: dd4b0a42b58d43f4eaf8f8d40111cdcb,
-        type: 3}
-      propertyPath: testFace
-      value: 
-      objectReference: {fileID: 2800000, guid: d656ba2b5949bcb44be0635bcc05f1f5, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dd4b0a42b58d43f4eaf8f8d40111cdcb, type: 3}

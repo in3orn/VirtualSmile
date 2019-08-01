@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7607746846948072131}
   - component: {fileID: 7607746846948072130}
   m_Layer: 0
-  m_Name: Face Recognition
+  m_Name: Test Face Recognition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

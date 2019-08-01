@@ -7,6 +7,7 @@ namespace Emojis
     public class SmileDetectionMediator : MonoBehaviour
     {
         [SerializeField] private SmileDetectionView view;
+        [SerializeField] private Animator animator;
 
         [Inject] private SmileDetectionController smileDetectionController;
         [Inject] private FaceRecognitionController faceRecognitionController;
@@ -25,6 +26,13 @@ namespace Emojis
         {
             var smile = smileDetectionController.DetectSmile(imageJson);
             view.UpdateSmile(smile);
+
+            animator.SetLayerWeight(1, 1);
+
+            if (smile == SmileType.VeryHappy)
+                animator.CrossFade("smile1@unitychan", 0);
+            else
+                animator.CrossFade("default@unitychan", 0);
         }
     }
 }
