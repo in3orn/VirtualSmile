@@ -1,40 +1,55 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Photos
 {
     public class PhotosController
     {
+        public UnityEvent OnUpdated { get; } = new UnityEvent();
+
         private readonly PhotosConfig config;
-        private readonly List<Texture2D> storedPhotos;
-        private readonly List<Texture2D> capturedPhotos;
+        private readonly List<PhotoData> photos;
+
+        private bool upToDate;
 
         private string SavePath => Application.persistentDataPath;
+        public IList<PhotoData> Photos => photos;
 
         public PhotosController(PhotosConfig config)
         {
             this.config = config;
 
-            storedPhotos = new List<Texture2D>();
-            capturedPhotos = new List<Texture2D>();
+            photos = new List<PhotoData>();
         }
 
         public void Load()
         {
-            if (capturedPhotos.Count > 0) Save();
+            if (upToDate) return;
 
-            storedPhotos.Clear();
+            photos.Clear();
 
             var info = new DirectoryInfo(SavePath);
             var files = info.GetFiles("*.png");
             foreach (var file in files)
             {
-                var texture = LoadPng(file.FullName);
-                storedPhotos.Add(texture);
+                var photo = LoadPhoto(file.FullName);
+                photos.Add(photo);
             }
 
-            Debug.Log($"Photos loaded: {storedPhotos.Count}");
+            upToDate = true;
+
+            Debug.Log($"Photos loaded: {photos.Count}");
+        }
+
+        private PhotoData LoadPhoto(string filePath)
+        {
+            return new PhotoData
+            {
+                texture = LoadPng(filePath),
+                persistent = true
+            };
         }
 
         private Texture2D LoadPng(string filePath)
@@ -52,17 +67,28 @@ namespace Photos
 
         public void Save()
         {
-            var count = capturedPhotos.Count;
-            for (var i = 0; i < count; i++)
+            if (upToDate) return;
+
+            var count = 0;
+            for (var i = 0; i < photos.Count; i++)
             {
-                var photo = capturedPhotos[i];
-                SavePng(photo, storedPhotos.Count + i + 1);
+                var photo = photos[i];
+                if (!photo.persistent)
+                {
+                    SavePhoto(photo, i + 1);
+                    count++;
+                }
             }
 
-            storedPhotos.AddRange(capturedPhotos);
-            capturedPhotos.Clear();
+            upToDate = true;
 
-            Debug.Log($"Photos saved: {count} / {storedPhotos.Count}");
+            Debug.Log($"Photos saved: {count} / {photos.Count}");
+        }
+
+        private void SavePhoto(PhotoData photo, int fileIndex)
+        {
+            SavePng(photo.texture, fileIndex);
+            photo.persistent = true;
         }
 
         private void SavePng(Texture2D texture, int fileIndex)
@@ -71,9 +97,20 @@ namespace Photos
             File.WriteAllBytes($"{SavePath}/{config.saveName}-{fileIndex}.png", bytes);
         }
 
-        public void Add(Texture2D photo)
+        public void Add(Texture2D texture)
         {
-            capturedPhotos.Add(photo);
+            upToDate = false;
+
+            photos.Add(CreateNewPhoto(texture));
+            OnUpdated.Invoke();
+        }
+
+        private PhotoData CreateNewPhoto(Texture2D texture)
+        {
+            return new PhotoData
+            {
+                texture = texture
+            };
         }
     }
 }

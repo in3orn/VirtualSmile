@@ -1,4 +1,5 @@
 using System;
+using Common;
 using Photos;
 using UnityEngine;
 using Zenject;
@@ -14,6 +15,7 @@ namespace Context
             Container.BindInstance(photosConfig).IfNotBound();
 
             Container.Bind<PhotosController>().AsSingle();
+            Container.Bind<DynamicContent>().AsSingle();
         }
     }
 }
