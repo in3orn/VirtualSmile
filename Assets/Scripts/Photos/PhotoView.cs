@@ -22,7 +22,6 @@ namespace Photos
 
             image.texture = data.texture;
             imageTransform.ApplyRatio(data.AspectRatio);
-            imageTransform.localRotation = Quaternion.Euler(0f, 0f, -data.rotation);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Cameras
         public bool Initialized { get; private set; }
         public int NumOfCameras => cameras.Length;
         public bool Playing => Initialized && currentCamera.texture.isPlaying;
-        public float CurrentAngle => currentCamera.texture.videoRotationAngle;
+        public int CurrentAngle => currentCamera.texture.videoRotationAngle;
 
         public float AspectRatio =>
             (float) currentCamera.texture.requestedWidth / currentCamera.texture.requestedHeight;
@@ -110,15 +110,30 @@ namespace Cameras
 
         public PhotoData TakePhoto()
         {
+            return new PhotoData
+            {
+                texture = GetTexture()
+            };
+        }
+
+        public Texture2D GetTexture()
+        {
             Texture2D texture = new Texture2D(currentCamera.texture.width, currentCamera.texture.height);
             texture.SetPixels(currentCamera.texture.GetPixels());
             texture.Apply();
 
-            return new PhotoData
-            {
-                texture = texture,
-                rotation = CurrentAngle
-            };
+            var angle = CurrentAngle;
+            if (angle < 0) angle += 360;
+            angle %= 360;
+
+            if (angle == 90)
+                texture = texture.Rotate(true);
+            else if (angle == 180)
+                texture = texture.RreflectHorizontally();
+            else if (angle == 270)
+                texture = texture.Rotate(false);
+
+            return texture;
         }
 
         private void LateUpdate()
