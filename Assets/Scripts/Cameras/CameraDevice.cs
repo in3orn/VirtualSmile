@@ -117,7 +117,7 @@ namespace Cameras
             return new PhotoData
             {
                 texture = texture,
-                cameraAngle = CurrentAngle
+                rotation = CurrentAngle
             };
         }
 

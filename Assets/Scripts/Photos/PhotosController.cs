@@ -34,7 +34,7 @@ namespace Photos
             var files = info.GetFiles("*.png");
             foreach (var file in files)
             {
-                var photo = LoadPhoto(file.FullName);
+                var photo = LoadPhoto(file.FullName, file.Name);
                 photos.Add(photo);
             }
 
@@ -43,11 +43,12 @@ namespace Photos
             Debug.Log($"Photos loaded: {photos.Count}");
         }
 
-        private PhotoData LoadPhoto(string filePath)
+        private PhotoData LoadPhoto(string filePath, string fileName)
         {
             return new PhotoData
             {
                 texture = LoadPng(filePath),
+                rotation = PlayerPrefs.GetFloat($"{fileName}-rotation"),
                 persistent = true
             };
         }
@@ -80,6 +81,7 @@ namespace Photos
                 }
             }
 
+            PlayerPrefs.Save();
             upToDate = true;
 
             Debug.Log($"Photos saved: {count} / {photos.Count}");
@@ -87,14 +89,18 @@ namespace Photos
 
         private void SavePhoto(PhotoData photo, int fileIndex)
         {
-            SavePng(photo.texture, fileIndex);
+            var name = $"{config.saveName}-{fileIndex}.png";
+
+            SavePng(photo.texture, name);
+            PlayerPrefs.SetFloat($"{name}-rotation", photo.rotation);
+
             photo.persistent = true;
         }
 
-        private void SavePng(Texture2D texture, int fileIndex)
+        private void SavePng(Texture2D texture, string name)
         {
             var bytes = texture.EncodeToPNG();
-            File.WriteAllBytes($"{SavePath}/{config.saveName}-{fileIndex}.png", bytes);
+            File.WriteAllBytes($"{SavePath}/{name}", bytes);
         }
 
         public void Add(PhotoData photo)
